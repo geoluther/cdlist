@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<title>KGNU Wish List</title>
+	<!-- Bootstrap CSS -->
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+	<script src="https://unpkg.com/vue"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+	<style>
+	.received {
+		text-decoration: line-through;
+	}
+</style>
+
+    <!--
+        todo:
+        wire up to vuejs + axios instead of jquery
+        change to table formatting
+        add sort options by name column.
+        style to match kgnu.org a little more
+    -->
+
+</head>
+
+<body>
+	<div class="container">
+		<br>
+		<h3>KGNU CD Thank You Gifts</h3>
+		<div class="row">
+			<div class="col">
+				<p>We have too many CDs available as thank you gifts to mention on air!</p>
+				<p>Mention the specific <strong>Album Title</strong> and <strong>Artist</strong> in the thank you gift area in the donation form if you'd like one of these as your gift.</p>
+
+			</div>
+		</div>
+
+        <!-- component template -->
+        <script type="text/x-template" id="grid-template">
+        	<table class="table table-sm table-striped" >
+        		<thead>
+        			<tr>
+        				<th v-for="key in columns"
+        				@click="sortBy(key)"
+        				:class="{ active: sortKey == key }">
+        				{{ key | capitalize }}
+        				<span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
+        				</span>
+        			</th>
+        		</tr>
+        	</thead>
+        	<tbody>
+        		<tr v-for="entry in filteredData">
+        			<td v-for="key in columns">
+        				{{entry[key]}}
+        			</td>
+        		</tr>
+        	</tbody>
+        </table>
+    </script>
+
+    <div id="demo">
+    	<form id="search">
+    		Search <input name="query" v-model="searchQuery">
+    	</form>
+    	<demo-grid
+    	:data="gridData"
+    	:columns="gridColumns"
+    	:filter-key="searchQuery">
+    </demo-grid>
+</div>
+
+<hr>
+<div class="table-responsive">
+	<table class="table table-sm table-striped" id="app-cdlist">
+		<thead>
+			<tr>
+				<th scope="col">Album</th>
+				<th scope="col">Artist</th>
+				<th scope="col">Genre</th>
+				<th scope="col">Quantity</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr v-for="cd in cdlist">
+				<td><strong>{{ cd.title }}</strong></td>
+				<td>{{ cd.description }}</td>
+				<td><i>{{ cd.genre }}</i></td>
+				<td><i>{{ cd.number }}</i></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<hr>
+<div class="row">
+	<div class="col">
+		<div class="wishlist">
+			<i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+		</div>
+	</div>
+</div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+
+<script>
+
+        // cdlist key: 1TbS7XG-SYaCJozVz2EtQkWbUHez6IRCJB23ZhLphgBM
+        const cdURI = "https://spreadsheets.google.com/feeds/list/1TbS7XG-SYaCJozVz2EtQkWbUHez6IRCJB23ZhLphgBM/1/public/values?alt=json";
+
+        // respose field format
+        // ["0"].gsx$artist.$t
+
+        // fetch CD primium data from google spreadsheet
+
+        let cdData = [];
+
+        axios.get(cdURI)
+        .then(function (response) {
+        	const items = response.data;
+            // console.log(response);
+            // console.log(items.feed.entry);
+            for (item of items.feed.entry) {
+            	let artist = item.gsx$artist.$t;
+            	let album = item.gsx$title.$t;
+            	let genre = item.gsx$genre.$t; // todo: make Cap case
+            	let number = item.gsx$number.$t
+            	let amount = item.gsx$amount.$t
+
+            	thisgift = { title: album, description: artist, genre: genre, number: number, amount: amount};
+
+            	cdData.push(thisgift);
+            }
+            console.log(cdData);
+        })
+        .catch(function (error) {
+        	console.log(error);
+        	cdData.push({ title: "Whoops!", description: "Could not load CD list", genre: ""})
+        });
+
+
+        var appCDlist = new Vue({
+        	el: '#app-cdlist',
+        	data: {
+        		cdlist: cdData
+        	}
+        })
+
+        // fancy table component
+        Vue.component('demo-grid', {
+        	template: '#grid-template',
+        	props: {
+        		data: Array,
+        		columns: Array,
+        		filterKey: String
+        	},
+        	data: function () {
+        		var sortOrders = {}
+        		this.columns.forEach(function (key) {
+        			sortOrders[key] = 1
+        		})
+        		return {
+        			sortKey: '',
+        			sortOrders: sortOrders
+        		}
+        	},
+        	computed: {
+        		filteredData: function () {
+        			var sortKey = this.sortKey
+        			var filterKey = this.filterKey && this.filterKey.toLowerCase()
+        			var order = this.sortOrders[sortKey] || 1
+        			var data = this.data
+        			if (filterKey) {
+        				data = data.filter(function (row) {
+        					return Object.keys(row).some(function (key) {
+        						return String(row[key]).toLowerCase().indexOf(filterKey) > -1
+        					})
+        				})
+        			}
+        			if (sortKey) {
+        				data = data.slice().sort(function (a, b) {
+        					a = a[sortKey]
+        					b = b[sortKey]
+        					return (a === b ? 0 : a > b ? 1 : -1) * order
+        				})
+        			}
+        			return data
+        		}
+        	},
+        	filters: {
+        		capitalize: function (str) {
+        			return str.charAt(0).toUpperCase() + str.slice(1)
+        		}
+        	},
+        	methods: {
+        		sortBy: function (key) {
+        			this.sortKey = key
+        			this.sortOrders[key] = this.sortOrders[key] * -1
+        		}
+        	}
+        })
+
+// bootstrap the demo
+var demo = new Vue({
+	el: '#demo',
+	data: {
+		searchQuery: '',
+		gridColumns: ['title', 'description', 'genre', 'number'],
+		gridData: cdData
+	}
+})
+</script>
+
+</body>
+</html>
