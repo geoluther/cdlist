@@ -7,7 +7,7 @@
 	<!-- Bootstrap CSS -->
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
-	<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 	<script src="https://unpkg.com/vue"></script>
 	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -71,52 +71,57 @@
 			</div>
 		</div>
 
-		<!-- component template -->
-		<script type="text/x-template" id="grid-template">
-			<div class="table-responsive">
-				<table class="table table-sm table-striped" >
-					<thead>
-						<tr>
-							<th v-for="key in columns"
-							@click="sortBy(key)"
-							:class="{ active: sortKey == key }">
-							{{ key | capitalize }}
-							<span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
-							</span>
-						</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr v-for="entry in filteredData">
-						<td v-for="key in columns">
-							{{entry[key]}}
-						</td>
-					</tr>
-				</tbody>
-			</table>
+		<div id="cd-list">
+			<p>
+				<form id="search">
+					<strong>Search:</strong>
+					<input name="query" v-model="searchQuery" placeholder="">
+				</form></p>
+				<demo-grid
+				:data="gridData"
+				:columns="gridColumns"
+				:filter-key="searchQuery">
+			</demo-grid>
 		</div>
-	</script>
-
-	<div id="cd-list">
-		<p>
-			<form id="search">
-				<strong>Filter:</strong>
-				<input name="query" v-model="searchQuery" placeholder="">
-			</form></p>
-			<demo-grid
-			:data="gridData"
-			:columns="gridColumns"
-			:filter-key="searchQuery">
-		</demo-grid>
 	</div>
-</div>
 
-<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
 
+	<!-- component template -->
+	<script type="text/x-template" id="grid-template">
+		<div v-if="filteredData.length < 1 && filterKey == '' ">
+			<p><i class="fa fa-spinner fa-spin" style="font-size:24px"></i>
+				<em>Loading</em>
+			</p>
+			</div>
+			<div v-else>
+				<div vclass="table-responsive">
+					<table class="table table-sm table-striped" >
+						<thead>
+							<tr>
+								<th v-for="key in columns"
+								@click="sortBy(key)"
+								:class="{ active: sortKey == key }">
+								{{ key | capitalize }}
+								<span class="arrow" :class="sortOrders[key] > 0 ? 'asc' : 'dsc'">
+								</span>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="entry in filteredData">
+							<td v-for="key in columns">
+								{{entry[key]}}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div></div>
+		</script>
 
-<script>
+		<script>
 
         // cdlist key: 1TbS7XG-SYaCJozVz2EtQkWbUHez6IRCJB23ZhLphgBM
         const cdURI = "https://spreadsheets.google.com/feeds/list/1TbS7XG-SYaCJozVz2EtQkWbUHez6IRCJB23ZhLphgBM/1/public/values?alt=json";
@@ -153,14 +158,6 @@
         	console.log(error);
         	cdData.push({ title: "Whoops!", description: "Could not load CD list", genre: ""})
         });
-
-
-        // var appCDlist = new Vue({
-        // 	el: '#app-cdlist',
-        // 	data: {
-        // 		cdlist: cdData
-        // 	}
-        // })
 
         // fancy table component
         Vue.component('demo-grid', {
@@ -217,7 +214,7 @@
         })
 
 // bootstrap the demo
-var demo = new Vue({
+var app = new Vue({
 	el: '#cd-list',
 	data: {
 		searchQuery: '',
