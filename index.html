@@ -64,20 +64,28 @@
 <body>
 	<div class="container">
 		<br>
-		<h3>KGNU CD Thank You Gifts</h3>
 		<div class="row">
 			<div class="col">
-				<p>We have too many CDs available as thank you gifts to mention on air!</p>
-				<p>Mention the specific <strong>Album Title</strong> and <strong>Artist</strong> in the thank you gift area in the donation form if you'd like one of these as your gift.</p>
+				<h3>KGNU CD Thank You Gifts</h3>
 			</div>
 		</div>
-
+		<div class="row">
+			<div class="col-2">
+				<img class="img-fluid img-thumbnail" src="img/cd-blue.png" alt="">
+			</div>
+			<div class="col-8">
+				<p>We have too many CDs available as thank you gifts to mention on air!</p>
+				<p>To claim a CD, mention the specific <strong>Album Title</strong> and <strong>Artist</strong> in the thank you gift area on the donation form.</p>
+				<p><a href="https://give.kgnu.org" target="_blank" class="btn btn-success"><i class="fa fa-dollar" style=""></i>  Donate Now</a>
+					<a href="https://www.kgnu.org" class="btn btn-info">Back to KGNU</a></p>
+			</div>
+		</div>
+		<hr>
 		<div id="cd-list">
 			<p>
-				<form id="search">
-					<strong>Search:</strong>
+			<strong>Search:</strong>
 					<input name="query" v-model="searchQuery" placeholder="">
-				</form></p>
+				</input></p>
 				<demo-grid
 				:data="gridData"
 				:columns="gridColumns"
